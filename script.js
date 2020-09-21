@@ -1,19 +1,10 @@
-function authenticate() {
-    return gapi.auth2.getAuthInstance()
-        .signIn({
-            scope: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events"
-        })
-        .then(function () {
-                console.log("Sign-in successful");
-            },
-            function (err) {
-                console.error("Error signing in", err);
-            });
+const authenticateAsync = () => {
+    return gapi.auth2.getAuthInstance().signIn()
 }
 
-async function getCalender(studentId, calendars, rowIndex) {
-    if (!calendars) {
-        calendars = [];
+async function getCalender(studentId, events, rowIndex) {
+    if (!events) {
+        events = [];
     }
     if (!rowIndex) {
         rowIndex = 50;
@@ -30,24 +21,20 @@ async function getCalender(studentId, calendars, rowIndex) {
         "method": "POST",
     });
     const data = await response.json();
-    const newCalendars = JSON.parse(data.d[3]);
-    calendars = [...calendars, ...newCalendars];
-    if (newCalendars.length < 50) {
-        return calendars;
+    const newEvents = JSON.parse(data.d[3]);
+    events = [...events, ...newEvents];
+    if (newEvents.length < 50) {
+        return events;
     }
     rowIndex += 50;
-    return getCalender(studentId, calendars, rowIndex)
+    return getCalender(studentId, events, rowIndex)
 }
 
-function loadClient() {
+const loadClientAsync = async () => {
+    console.log("Loading client...");
     gapi.client.setApiKey("AIzaSyBH-L4FN8eHqhihuETlel0TLriimhiEU-8");
-    return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/calendar/v3/rest")
-        .then(function () {
-                console.log("GAPI client loaded for API");
-            },
-            function (err) {
-                console.error("Error loading GAPI client for API", err);
-            });
+    await gapi.client.load("https://content.googleapis.com/discovery/v1/apis/calendar/v3/rest");
+    console.log("Client loaded successfully!");
 }
 // Make sure the client is loaded and sign-in is complete before calling this method.
 async function execute() {
@@ -98,8 +85,69 @@ const deleteAll = async () => {
     batch.then(() => console.log("Deleted all"))
 }
 
-gapi.load("client:auth2", function () {
-    gapi.auth2.init({
-        client_id: "406673141797-idjgps1huq10bpu6nd60eks51lgk963a.apps.googleusercontent.com"
-    });
-});
+const getCalendarId = async () => {
+    try {
+        const calendars = await gapi.client.calendar.calendarList.list()
+        const calendar = calendars.result.items.find(item => item.summary.toLowerCase() === "lịch học");
+        if (calendar) {
+            return calendar.id;
+        }
+        console.log("Could not find calendar name \"Lịch học\". Creating...");
+        const newCalender = await gapi.client.calendar.calendars.insert({
+            summary: "Lịch học"
+        })
+        return newCalender.result.id;
+    }
+    catch (error) {
+        console.error("An error occurred", error);
+    }
+}
+
+const loadGapiAsync = async () => {
+    return new Promise((resolve, reject) => {
+        gapi.load("client:auth2", () => {
+            gapi.auth2.init({
+                client_id: "406673141797-idjgps1huq10bpu6nd60eks51lgk963a.apps.googleusercontent.com",
+                scope: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
+                fetch_basic_profile: true,
+                ux_mode: "redirect"
+            })
+                .then(resolve)
+                .catch(reject)
+        });
+    })
+}
+
+const initAsync = async () => {
+    try {
+        console.log("Loading gapi...");
+        await loadGapiAsync();
+        console.log("Gapi loaded successfully!");
+    }
+    catch (error) {
+        console.error("An error occurred", error);
+        alert(error.details);
+    }
+}
+
+const checkUserAsync = async () => {
+    console.log("Checking user...");
+    const googleUser = gapi.auth2.getAuthInstance().currentUser.get();
+    if (!googleUser) {
+        console.log("User did not sign in");
+        return await authenticateAsync();
+    }
+    const profile = googleUser.getBasicProfile();
+    console.log("Signed in as " + profile.getName(), googleUser);
+}
+
+const syncCalendar = async () => {
+    await loadClientAsync();
+    const calenderId = await getCalendarId();
+}
+
+async function bootstrap() {
+    await initAsync();
+    await checkUserAsync();
+}
+bootstrap();
