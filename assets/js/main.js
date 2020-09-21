@@ -1,4 +1,4 @@
-const loadGapiAsync = async () => {
+const loadGapiAsync = async() => {
     return new Promise((resolve, reject) => {
         gapi.load("client:auth2", () => {
             gapi.auth2.init({
@@ -13,14 +13,14 @@ const loadGapiAsync = async () => {
     })
 }
 
-const loadClientAsync = async () => {
+const loadClientAsync = async() => {
     console.log("Loading client...");
     gapi.client.setApiKey("AIzaSyBH-L4FN8eHqhihuETlel0TLriimhiEU-8");
     await gapi.client.load("https://content.googleapis.com/discovery/v1/apis/calendar/v3/rest");
     console.log("Client loaded successfully!");
 }
 
-const initAsync = async () => {
+const initAsync = async() => {
     try {
         console.log("Loading gapi...");
         await loadGapiAsync();
@@ -31,12 +31,15 @@ const initAsync = async () => {
     }
 }
 
-const getCalendarId = async () => {
+const getCalendarId = async(returnNew) => {
     try {
         const calendars = await gapi.client.calendar.calendarList.list()
         const calendar = calendars.result.items.find(item => item.summary.toLowerCase() === "lịch học");
         if (calendar) {
             return calendar.id;
+        }
+        if (!returnNew) {
+            return null;
         }
         console.log("Could not find calendar name \"Lịch học\". Creating...");
         const newCalender = await gapi.client.calendar.calendars.insert({
@@ -48,44 +51,30 @@ const getCalendarId = async () => {
     }
 }
 
-const getAllItems = async () => {
-    const calenderId = await getCalendarId();
-    const calendar = await gapi.client.calendar.events.list({
-        calendarId: "primary",
-        maxResults: 999999999
-    });
-    console.log(calendar.result.items);
-    return {
-        calenderId,
-        calendar
-    };
-}
-
-const deleteAll = async () => {
-    const {
-        calendarId,
-        calendar
-    } = await getAllItems();
-    if (!calendar.result.items.length) {
+const deleteAll = async() => {
+    const calendarId = await getCalendarId(false);
+    if (!calendarId) {
         return console.log("No calendars found. Skipping...")
     }
-    const batch = gapi.client.newBatch();
-    calendar.result.items.map(event => {
-        batch.add(gapi.client.calendar.events.delete({
-            eventId: event.id,
-            calendarId: calendarId
-        }));
+    await gapi.client.calendar.calendars.delete({
+        calendarId
     })
-    batch.then(() => console.log("Deleted all"))
+    return console.log("Calendars deleted successfully!")
 }
 
-const syncCalendarAsync = async () => {
-    const calenderId = await getCalendarId();
+const syncCalendarAsync = async() => {
+    console.log("Start sync calendar....")
     const userId = await document.getElementById("studentId").value;
-    if (!/^\d{6}$/gm.test(userId)) {
-        return alert("Please enter valid studentId");
+    if (!/^\d{9}$/gm.test(userId)) {
+        return alert("Vui lòng nhập mã sinh viên");
     }
+    const button = document.getElementById("sync");
+    button.innerHTML = '<i class="fa fa-spinner fa-spin"></i><span>Đang đồng bộ</span>';
+    button.disabled = true;
+    const calenderId = await getCalendarId(true);
     const events = await getAllLhuEvents(userId);
+    const batch = gapi.client.newBatch();
+    console.log(events)
     events.map((event) => {
         const data = {
             "calendarId": calenderId,
@@ -106,7 +95,10 @@ const syncCalendarAsync = async () => {
         console.log(data);
         batch.add(gapi.client.calendar.events.insert(data));
     })
-    batch.then(() => console.log("Saved all"))
+    batch.then(() => {
+        button.disabled = false;
+        button.innerHTML = "Đồng bộ ngay";
+    })
 }
 
 async function bootstrap() {

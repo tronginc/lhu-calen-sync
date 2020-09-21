@@ -4,23 +4,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Đồng bộ lịch học</title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
-    <input id="studentId" />
+    <aside class="card">
+        <div class="header">
+            <img src="https://lhu.edu.vn/Data/News/446/images/LogoLHU_Daf.png" alt="logo">
+            <h1 id="title">Đồng bộ lịch học</h1>
+            <a href="#" id="logout" onclick="signOut()" disabled>Với Google Lịch</a>
+        </div>
+
+        <div class="body">
+            <div id="not-signed-in" style="display: none">
+                <div id="login-button"></div>
+            </div>
+            <div id="signed-in" style="display: none">
+                <input id="studentId" placeholder="Mã sinh viên" type="text" />
+                <button id="sync" onclick="syncCalendarAsync()">Đồng bộ ngay</button>
+                <button onclick="deleteAll()">Xóa tất cả</button>
+            </div>
+
+        </div>
+    </aside>
 </body>
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.28.0/moment.min.js"
-    integrity="sha512-Q1f3TS3vSt1jQ8AwP2OuenztnLU6LwxgyyYOG1jgMW/cbEMHps/3wjvnl1P3WTrF3chJUWEoxDUEjMxDV8pujg=="
-    crossorigin="anonymous"></script>
+<script src="https://apis.google.com/js/platform.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.28.0/moment.min.js" integrity="sha512-Q1f3TS3vSt1jQ8AwP2OuenztnLU6LwxgyyYOG1jgMW/cbEMHps/3wjvnl1P3WTrF3chJUWEoxDUEjMxDV8pujg==" crossorigin="anonymous"></script>
 <script src="./assets/js/auth.js"></script>
 <script src="./assets/js/lhu-calendar.js"></script>
 <script src="./assets/js/main.js"></script>
-<button onclick="authenticate().then(loadClient)">authorize and load</button>
-<button onclick="syncCalendarAsync()">syncCalendarAsync</button>
-<button onclick="getAllItems()">getAllItems</button>
-<button onclick="deleteAll()">deleteAll</button>
-<button onclick="signOut()">signOut</button>
 
 </html>

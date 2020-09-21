@@ -3,7 +3,7 @@ async function getAllLhuEvents(studentId, events, rowIndex) {
         events = [];
     }
     if (!rowIndex) {
-        rowIndex = 50;
+        rowIndex = 0;
     }
     const response = await fetch("https://cors-anywhere.herokuapp.com/http://calen.lhu.edu.vn/AjaxPage/AjaxPage.aspx/LichSinhVien", {
         "headers": {
