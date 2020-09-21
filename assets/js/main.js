@@ -98,6 +98,7 @@ const syncCalendarAsync = async() => {
     batch.then(() => {
         button.disabled = false;
         button.innerHTML = "Đồng bộ ngay";
+        alert("Đồng bộ thành công!")
     })
 }
 

@@ -13,6 +13,7 @@ const checkUserAsync = async() => {
         return document.getElementById("not-signed-in").style.display = "block";
 
     }
+    // gapi.auth2.getAuthInstance().disconnect();
     const profile = googleUser.getBasicProfile();
     document.getElementById("title").innerHTML = profile.getName();
     console.log("Signed in as " + profile.getName());
