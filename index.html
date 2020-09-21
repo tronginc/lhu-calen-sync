@@ -14,11 +14,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.28.0/moment.min.js"
     integrity="sha512-Q1f3TS3vSt1jQ8AwP2OuenztnLU6LwxgyyYOG1jgMW/cbEMHps/3wjvnl1P3WTrF3chJUWEoxDUEjMxDV8pujg=="
     crossorigin="anonymous"></script>
-<script src="./script.js"></script>
+<script src="./assets/js/auth.js"></script>
+<script src="./assets/js/lhu-calendar.js"></script>
+<script src="./assets/js/main.js"></script>
 <button onclick="authenticate().then(loadClient)">authorize and load</button>
-<button onclick="execute()">execute</button>
-<button onclick="getAll()">getAll</button>
+<button onclick="syncCalendarAsync()">syncCalendarAsync</button>
+<button onclick="getAllItems()">getAllItems</button>
 <button onclick="deleteAll()">deleteAll</button>
-<button onclick="test()">test</button>
+<button onclick="signOut()">signOut</button>
 
 </html>
